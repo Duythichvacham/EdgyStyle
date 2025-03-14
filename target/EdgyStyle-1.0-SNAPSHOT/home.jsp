@@ -28,7 +28,7 @@
             <span class="cart-icon">🛒</span>
         </div>
     </nav>
-    <div class="hero-section">
+    <div class="video-background">
         <video autoplay loop muted playsinline>
             <source src="./videos/home.mp4" type="video/mp4">
         </video>

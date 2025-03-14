@@ -18,9 +18,13 @@ public class ProductDTO {
     private String imageUrl;
     private String color;
     private String brand;
+<<<<<<< HEAD
     private String size;
     private int ct_id;
     private int quantity;
+=======
+    private int ct_id;
+>>>>>>> 883bc3bece04c0ce3713fec7b32f26942bd2bf27
 
     public ProductDTO() {
     }
