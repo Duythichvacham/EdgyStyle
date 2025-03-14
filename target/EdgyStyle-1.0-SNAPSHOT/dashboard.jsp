@@ -67,26 +67,7 @@
                             <li><a href="MainController?action=ViewCancelledOrders"><i class="fas fa-times-circle"></i> Đơn hàng đã hủy</a></li>
                         </ul>
                     </div>
-                    
-                    <%
-                    } else if ("STF".equals(role)) {
-                    %>
-                    <div class="sidebar-category">
-                        <h3>Quản lý đơn hàng</h3>
-                        <ul>
-                            <li><a href="MainController?action=ViewAssignedOrders"><i class="fas fa-tasks"></i> Đơn hàng được giao</a></li>
-                            <li><a href="MainController?action=ViewOrderDetails"><i class="fas fa-info-circle"></i> Chi tiết đơn hàng</a></li>
-                            <li><a href="MainController?action=UpdateOrderStatus"><i class="fas fa-edit"></i> Cập nhật trạng thái</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="sidebar-category">
-                        <h3>Quản lý sản phẩm</h3>
-                        <ul>
-                            <li><a href="MainController?action=ViewProducts"><i class="fas fa-tshirt"></i> Danh sách sản phẩm</a></li>
-                            <li><a href="MainController?action=UpdateInventory"><i class="fas fa-boxes"></i> Cập nhật kho hàng</a></li>
-                        </ul>
-                    </div>
+                                       
                     <%
                     } else if ("USR".equals(role)) {
                     %>
@@ -156,29 +137,7 @@
                             <div class="activity-list">
                                 <!-- Danh sách hoạt động gần đây sẽ được hiển thị ở đây -->
                             </div>
-                        </div>
-                        <%
-                            } else if ("STF".equals(role)) {
-                        %>
-                        <div class="dashboard-stats">
-                            <div class="stat-card">
-                                <i class="fas fa-tasks"></i>
-                                <h3>Đơn hàng được giao</h3>
-                                <p class="stat-number"><!-- Số liệu thống kê --></p>
-                            </div>
-                            <div class="stat-card">
-                                <i class="fas fa-check-circle"></i>
-                                <h3>Đã hoàn thành</h3>
-                                <p class="stat-number"><!-- Số liệu thống kê --></p>
-                            </div>
-                        </div>
-                        
-                        <div class="recent-activity">
-                            <h3>Công việc cần làm</h3>
-                            <div class="task-list">
-                                <!-- Danh sách công việc sẽ được hiển thị ở đây -->
-                            </div>
-                        </div>
+                        </div>  
                         <%
                             } else if ("User".equals(role)) {
                         %>

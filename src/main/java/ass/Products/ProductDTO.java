@@ -10,6 +10,7 @@ package ass.Products;
  * @author nttu2
  */
 public class ProductDTO {
+
     private int id;
     private String name;
     private String description;
@@ -17,12 +18,14 @@ public class ProductDTO {
     private String imageUrl;
     private String color;
     private String brand;
-    private String ct_id;
+    private String size;
+    private int ct_id;
+    private int quantity;
 
     public ProductDTO() {
     }
 
-    public ProductDTO(int id, String name, String description, double price, String imageUrl, String color, String brand, String ct_id) {
+    public ProductDTO(int id, String name, String description, double price, String imageUrl, String color, String brand, int ct_id) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -89,13 +92,28 @@ public class ProductDTO {
         this.brand = brand;
     }
 
-    public String getCt_id() {
+    public int getCt_id() {
         return ct_id;
     }
 
-    public void setCt_id(String ct_id) {
+    public void setCt_id(int ct_id) {
         this.ct_id = ct_id;
     }
-    
-    
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
 }

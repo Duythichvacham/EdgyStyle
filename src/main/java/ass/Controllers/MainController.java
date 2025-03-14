@@ -93,18 +93,6 @@ public class MainController extends HttpServlet {
                         url = "ReviewController?action=ReviewServiceForm";
                         break;
 
-                    //staff
-                    case "ViewAssignedAppointments":
-                        url = "AppointmentController?action=ViewAssignedAppointments";
-                        break;
-
-                    case "ViewConsultation":
-                        url = "AppointmentController?action=ViewConsultation";
-                        break;
-                    case "AddConsultationNotes":
-                        url = "AppointmentController?action=AddConsultationNotes";
-                        break;
-
                     case "Logout": {
                         HttpSession session = request.getSession(false);
                         if (session != null) {
