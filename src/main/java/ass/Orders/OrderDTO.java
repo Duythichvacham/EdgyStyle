@@ -17,12 +17,12 @@ public class OrderDTO {
     private Date ordered_At;
     private double totatlPrice;
     private String status;
-    private String u_id;
+    private int u_id;
 
     public OrderDTO() {
     }
 
-    public OrderDTO(int id, Date ordered_At, double totatlPrice, String status, String u_id) {
+    public OrderDTO(int id, Date ordered_At, double totatlPrice, String status, int u_id) {
         this.id = id;
         this.ordered_At = ordered_At;
         this.totatlPrice = totatlPrice;
@@ -62,11 +62,11 @@ public class OrderDTO {
         this.status = status;
     }
 
-    public String getU_id() {
+    public int getU_id() {
         return u_id;
     }
 
-    public void setU_id(String u_id) {
+    public void setU_id(int u_id) {
         this.u_id = u_id;
     }
 

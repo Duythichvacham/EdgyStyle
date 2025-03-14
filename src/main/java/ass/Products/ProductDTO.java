@@ -17,12 +17,12 @@ public class ProductDTO {
     private String imageUrl;
     private String color;
     private String brand;
-    private String ct_id;
+    private int ct_id;
 
     public ProductDTO() {
     }
 
-    public ProductDTO(int id, String name, String description, double price, String imageUrl, String color, String brand, String ct_id) {
+    public ProductDTO(int id, String name, String description, double price, String imageUrl, String color, String brand, int ct_id) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -89,11 +89,11 @@ public class ProductDTO {
         this.brand = brand;
     }
 
-    public String getCt_id() {
+    public int getCt_id() {
         return ct_id;
     }
 
-    public void setCt_id(String ct_id) {
+    public void setCt_id(int ct_id) {
         this.ct_id = ct_id;
     }
     
