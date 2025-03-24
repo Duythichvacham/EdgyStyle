@@ -13,6 +13,10 @@
             background-color: #333;
             padding: 10px 20px;
             color: white;
+            position: sticky; /* Làm cho navbar dính */
+            top: 0; /* Dính ở phía trên cùng */
+            z-index: 1000; /* Đảm bảo navbar nằm trên các phần tử khác */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Thêm bóng để phân biệt khi cuộn */
         }
         .nav-left, .nav-right {
             display: flex;
@@ -35,9 +39,40 @@
             font-size: 20px;
             cursor: pointer;
         }
-        .video-background {
+        .video-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
             height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        .banner-ad-left, .banner-ad-right {
+            width: 160px;
+            height: 600px;
+            background-color: #ddd; /* Placeholder cho banner quảng cáo */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .banner-ad-left {
+            left: 0;
+        }
+        .banner-ad-right {
+            right: 0;
+        }
+        .banner-ad-left p, .banner-ad-right p {
+            text-align: center;
+            color: #333;
+            font-size: 14px;
+        }
+        .video-background {
+            width: calc(100% - 320px); /* Chừa 160px mỗi bên cho banner */
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -47,7 +82,71 @@
             position: relative;
             overflow: hidden;
         }
+        .video-background video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
         .content {
             padding: 20px;
             text-align: center;
+        }
+        .search-form {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-form input, .search-form select {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .search-form button {
+            padding: 5px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-form button:hover {
+            background-color: #45a049;
+        }
+        .product-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .product {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            width: 200px;
+            text-align: center;
+        }
+        .product img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .product h3 {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .product p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .error {
+            color: red;
+            margin-bottom: 20px;
         }

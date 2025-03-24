@@ -8,7 +8,6 @@ package ass.Controllers;
 import ass.Users.UserDAO;
 import ass.Users.UserDTO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -48,7 +47,7 @@ public class LoginController extends HttpServlet {
                 session.setAttribute("role", user.getRole());
                 session.setAttribute("address", user.getAddress());
 
-                response.sendRedirect("dashboard.jsp");
+                response.sendRedirect("home.jsp");
             } else {
                 request.setAttribute("error", "Invalid username or password");
                 request.getRequestDispatcher("login.jsp").forward(request, response);

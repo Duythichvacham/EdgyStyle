@@ -28,7 +28,7 @@ public class RegisterController extends HttpServlet {
         try {
             UserDAO userDAO = new UserDAO();
 
-            if ("RegisterUser".equals(action)) {
+            if ("register".equals(action)) {
                 String username = request.getParameter("username");
                 String fullName = request.getParameter("fullName");
                 String email = request.getParameter("email");
@@ -87,66 +87,6 @@ public class RegisterController extends HttpServlet {
                     request.setAttribute("ERROR", "Registration failed. Please try again.");
                     request.getRequestDispatcher("register.jsp").forward(request, response);
                 }
-            } else if ("RegisterStaff".equals(action)) {
-                // Only admin can register staff
-                if (request.getSession().getAttribute("role") == null
-                        || !request.getSession().getAttribute("role").equals("Admin")) {
-                    response.sendRedirect("login.jsp");
-                    return;
-                }
-
-                String username = request.getParameter("username");
-                String fullName = request.getParameter("fullName");
-                String email = request.getParameter("email");
-                String password = request.getParameter("password");
-                String phone = request.getParameter("phone");
-                String address = request.getParameter("address");
-
-                // Validate input
-                if (username == null || username.trim().isEmpty()
-                        || fullName == null || fullName.trim().isEmpty()
-                        || email == null || email.trim().isEmpty()
-                        || password == null || password.trim().isEmpty()) {
-
-                    request.setAttribute("ERROR", "All fields are required");
-                    request.getRequestDispatcher("registerAdmin.jsp").forward(request, response);
-                    return;
-                }
-
-                // Check if username or email already exists
-                if (userDAO.isUsernameExists(username)) {
-                    request.setAttribute("ERROR", "Username already exists");
-                    request.getRequestDispatcher("registerAdmin.jsp").forward(request, response);
-                    return;
-                }
-
-                if (userDAO.isEmailExists(email)) {
-                    request.setAttribute("ERROR", "Email already exists");
-                    request.getRequestDispatcher("registerAdmin.jsp").forward(request, response);
-                    return;
-                }
-
-                // Create new staff user
-                UserDTO user = new UserDTO();
-                user.setUsername(username);
-                user.setFull_name(fullName);
-                user.setEmail(email);
-                user.setPassword(password);
-                user.setPhone(phone);
-                user.setAddress(address);
-                user.setRole("Admin");
-
-                boolean success = userDAO.registerUser(user);
-
-                if (success) {
-                    request.setAttribute("SUCCESS", "Staff registration successful.");
-                    request.getRequestDispatcher("adminDashboard.jsp").forward(request, response);
-                } else {
-                    request.setAttribute("ERROR", "Staff registration failed. Please try again.");
-                    request.getRequestDispatcher("registerAdmin.jsp").forward(request, response);
-                }
-            } else {
-                request.getRequestDispatcher("register.jsp").forward(request, response);
             }
         } catch (Exception e) {
             e.printStackTrace();

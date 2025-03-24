@@ -1,0 +1,66 @@
+ body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .images img {
+            width: 50px;
+            height: 50px;
+            margin-right: 5px;
+            object-fit: cover;
+        }
+        .action-buttons form {
+            display: inline;
+        }
+        .action-buttons a {
+            color: purple;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .action-buttons a:hover {
+            text-decoration: underline;
+        }
+        .add-product-form {
+            margin-top: 20px;
+        }
+        .add-product-form label {
+            display: inline;
+            margin-right: 10px;
+        }
+        .add-product-form input, .add-product-form textarea {
+            width: 100%;
+            max-width: 300px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .add-product-form button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-product-form button:hover {
+            background-color: #45a049;
+        }
+        .empty-row {
+            text-align: center;
+            color: #888;
+        }

@@ -69,7 +69,7 @@
                     </div>
                                        
                     <%
-                    } else if ("USR".equals(role)) {
+                    } else if ("User".equals(role)) {
                     %>
                     <div class="sidebar-category">
                         <h3>Tài khoản của tôi</h3>
@@ -107,7 +107,7 @@
                     <div class="welcome-section">
                         <h2>Chào mừng đến với Edgy Style!</h2>
                         <%
-                            if ("ADM".equals(role)) {
+                            if ("Admin".equals(role)) {
                         %>
                         <div class="dashboard-stats">
                             <div class="stat-card">

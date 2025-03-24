@@ -6,6 +6,7 @@
 package ass.Controllers;
 
 import java.io.IOException;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ public class MainController extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-        String url = "login.jsp";
+        String url = "home.jsp";
 
         try {
             // Check if action is null and provide default
@@ -43,17 +44,12 @@ public class MainController extends HttpServlet {
                     case "Login":
                         url = "LoginController";
                         break;
-                    case "RegisterUser":
-                        url = "RegisterController?action=RegisterUser";
+                    case "register":
+                        url = "home.jsp";
+                        RequestDispatcher rd = request.getRequestDispatcher("./RegisterController");
+                        rd.forward(request, response);
                         break;
-
-                    //admin
-                    case "AddStaff":
-                        url = "registerAdmin.jsp";
-                        break;
-                    case "RegisterStaff":
-                        url = "RegisterController?action=RegisterStaff";
-                        break;
+                    
                     case "ViewServices":
                         url = "ServiceController?action=ViewServices";
                         break;
@@ -112,8 +108,9 @@ public class MainController extends HttpServlet {
             request.setAttribute("ERROR", "Error at MainController: " + e.toString());
             url = "error.jsp";
         } finally {
-            System.out.println("Forwarding to: " + url);
-            request.getRequestDispatcher(url).forward(request, response);
+            if (!response.isCommitted()) {
+                request.getRequestDispatcher(url).forward(request, response);
+            }
         }
     }
 

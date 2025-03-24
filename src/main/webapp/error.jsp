@@ -23,7 +23,7 @@
         <div class="error-container">
             <h2>Oops! Có lỗi xảy ra</h2>
             <p class="error-message"><%= errorMsg%></p>
-            <a class="back-link" href="dashboard.jsp">Quay về trang chính</a>
+            <a class="back-link" href="home.jsp">Quay về trang chính</a>
         </div>
     </body>
 </html>
