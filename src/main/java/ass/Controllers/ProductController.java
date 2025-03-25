@@ -1,9 +1,7 @@
 package ass.Controllers;
 
-import ass.Categories.CategoryDAO;
 import ass.Products.ProductDAO;
 import ass.Products.ProductDTO;
-import ass.Products.ProductImgUrlDTO;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -25,6 +23,11 @@ public class ProductController extends HttpServlet {
         ProductDAO productDAO = new ProductDAO();
         List<ProductDTO> products = productDAO.getAllProducts();
         request.setAttribute("products", products);
+        // Kiểm tra thông báo thành công từ redirect
+        String success = request.getParameter("success");
+        if (success != null) {
+            request.setAttribute("SUCCESS", success.replace("+", " "));
+        }
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -34,7 +37,6 @@ public class ProductController extends HttpServlet {
 
         try {
             ProductDAO productDAO = new ProductDAO();
-            CategoryDAO categoryDAO = new CategoryDAO();
 
             // Nếu không có action hoặc action rỗng, mặc định hiển thị danh sách sản phẩm
             if (action == null || action.isEmpty()) {
@@ -71,27 +73,26 @@ public class ProductController extends HttpServlet {
                     File uploadDir = new File(uploadPath);
                     System.out.println("Upload path: " + uploadPath);
                     if (!uploadDir.exists()) {
-                        boolean created = uploadDir.mkdirs(); // Sử dụng mkdirs() thay cho mkdir()
+                        boolean created = uploadDir.mkdirs();
                         System.out.println("Created upload directory: " + created);
                         if (!created) {
                             throw new IOException("Failed to create upload directory: " + uploadPath);
                         }
                     }
 
-                    for (Part part : request.getParts()) {
-                        if (part.getName().equals("images") && part.getSize() > 0) {
-                            String fileName = UUID.randomUUID().toString() + "_" + part.getSubmittedFileName();
-                            String filePath = uploadPath + File.separator + fileName;
-                            System.out.println("Writing file to: " + filePath);
-                            part.write(filePath);
-                            File uploadedFile = new File(filePath);
-                            if (!uploadedFile.exists()) {
-                                throw new IOException("Failed to write file: " + filePath);
-                            }
-                            System.out.println("File written successfully: " + uploadedFile.exists());
-                            String relativePath = UPLOAD_DIR + "/" + fileName;
-                            imgUrls.add(relativePath);
+                    Part part = request.getPart("images"); // Đổi thành "images" để khớp JSP
+                    if (part != null && part.getSize() > 0) {
+                        String fileName = UUID.randomUUID().toString() + "_" + part.getSubmittedFileName();
+                        String filePath = uploadPath + File.separator + fileName;
+                        System.out.println("Writing file to: " + filePath);
+                        part.write(filePath);
+                        File uploadedFile = new File(filePath);
+                        if (!uploadedFile.exists()) {
+                            throw new IOException("Failed to write file: " + filePath);
                         }
+                        System.out.println("File written successfully: " + uploadedFile.exists());
+                        String relativePath = UPLOAD_DIR + "/" + fileName;
+                        imgUrls.add(relativePath);
                     }
 
                     if (imgUrls.isEmpty()) {
@@ -103,12 +104,13 @@ public class ProductController extends HttpServlet {
 
                     boolean success = productDAO.addProductWithImages(product, imgUrls);
                     if (success) {
-                        request.setAttribute("SUCCESS", "Product added successfully.");
+                        // Redirect sau khi thành công để tránh double submission
+                        response.sendRedirect(request.getContextPath() + "/ProductController?success=Product+added+successfully");
                     } else {
                         request.setAttribute("ERROR", "Failed to add product: Unknown error.");
+                        loadProducts(request);
+                        request.getRequestDispatcher("productManager.jsp").forward(request, response);
                     }
-                    loadProducts(request);
-                    request.getRequestDispatcher("productManager.jsp").forward(request, response);
                 } catch (Exception e) {
                     request.setAttribute("ERROR", "Error adding product: " + e.getMessage());
                     try {
@@ -125,23 +127,22 @@ public class ProductController extends HttpServlet {
                     return;
                 }
 
-                int productId = Integer.parseInt(request.getParameter("productId"));
-                List<ProductImgUrlDTO> oldImages = productDAO.getProductImages(productId);
-                boolean success = productDAO.deleteProduct(productId);
-
-                if (success) {
-                    for (ProductImgUrlDTO oldImage : oldImages) {
-                        new File(getServletContext().getRealPath("") + File.separator + oldImage.getImg_url()).delete();
-                    }
-                    request.setAttribute("SUCCESS", "Product deleted successfully.");
-                } else {
-                    request.setAttribute("ERROR", "Failed to delete product.");
-                }
-                loadProducts(request); // Load lại danh sách sản phẩm
-                request.getRequestDispatcher("productManager.jsp").forward(request, response);
+                // Giữ nguyên phần DeleteProduct bị comment
+//                int productId = Integer.parseInt(request.getParameter("productId"));
+//                List<ProductImgUrlDTO> oldImages = productDAO.getProductImages(productId);
+//                boolean success = productDAO.deleteProduct(productId);
+//                if (success) {
+//                    for (ProductImgUrlDTO oldImage : oldImages) {
+//                        new File(getServletContext().getRealPath("") + File.separator + oldImage.getImg_url()).delete();
+//                    }
+//                    request.setAttribute("SUCCESS", "Product deleted successfully.");
+//                } else {
+//                    request.setAttribute("ERROR", "Failed to delete product.");
+//                }
+//                loadProducts(request);
+//                request.getRequestDispatcher("productManager.jsp").forward(request, response);
 
             } else if ("ViewProductDetails".equals(action)) {
-                // Giữ nguyên để điều hướng tới trang chỉnh sửa sau này
                 int productId = Integer.parseInt(request.getParameter("productId"));
                 ProductDTO product = productDAO.getProductById(productId);
                 request.setAttribute("product", product);
@@ -152,7 +153,7 @@ public class ProductController extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("ERROR", "Error in processing product: " + e.getMessage());
             try {
-                loadProducts(request); // Load lại danh sách sản phẩm ngay cả khi có lỗi
+                loadProducts(request);
             } catch (Exception ex) {
                 e.printStackTrace();
             }

@@ -9,34 +9,34 @@ package ass.Products;
  *
  * @author nttu2
  */
-
 import db.utils.DBUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 public class ProductDAO {
 
     public List<ProductDTO> getAllProducts() throws SQLException, ClassNotFoundException {
-       List<ProductDTO> productList = new ArrayList<>();
+        List<ProductDTO> productList = new ArrayList<>();
         String sql = "SELECT p_id, name, description, price, size, color, ct_id, stock_quantity FROM products";
 
         try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 ProductDTO product = new ProductDTO();
-                product.setId(rs.getInt("p_id"));
+                product.setP_id(rs.getInt("p_id"));
                 product.setName(rs.getString("name"));
                 product.setDescription(rs.getString("description"));
                 product.setPrice(rs.getDouble("price"));
                 product.setSize(rs.getString("size"));
                 product.setColor(rs.getString("color"));
                 product.setCt_id(rs.getInt("ct_id"));
+                product.setImg(getProductImages(product.getP_id()));
                 product.setStock_quantity(rs.getInt("stock_quantity"));
                 productList.add(product);
             }
@@ -50,19 +50,20 @@ public class ProductDAO {
         ProductDTO product = null;
 
         try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, productId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     product = new ProductDTO();
-                    product.setId(rs.getInt("p_id"));
+                    product.setP_id(rs.getInt("p_id"));
                     product.setName(rs.getString("name"));
                     product.setDescription(rs.getString("description"));
                     product.setPrice(rs.getDouble("price"));
                     product.setSize(rs.getString("size"));
                     product.setColor(rs.getString("color"));
                     product.setCt_id(rs.getInt("ct_id"));
+                    product.setImg(getProductImages(productId));
                     product.setStock_quantity(rs.getInt("stock_quantity"));
                 }
             }
@@ -111,7 +112,7 @@ public class ProductDAO {
         }
 
         try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sqlBuilder.toString())) {
+                PreparedStatement ps = conn.prepareStatement(sqlBuilder.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
@@ -120,7 +121,7 @@ public class ProductDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ProductDTO product = new ProductDTO();
-                    product.setId(rs.getInt("p_id"));
+                    product.setP_id(rs.getInt("p_id"));
                     product.setName(rs.getString("name"));
                     product.setDescription(rs.getString("description"));
                     product.setPrice(rs.getDouble("price"));
@@ -136,89 +137,86 @@ public class ProductDAO {
     }
 
     // Thêm phương thức để lấy danh sách URL ảnh cho một sản phẩm
-    public List<ProductImgUrlDTO> getProductImages(int productId) throws SQLException, ClassNotFoundException {
-        List<ProductImgUrlDTO> images = new ArrayList<>();
-        String sql = "SELECT p_id, img_url FROM product_img_url WHERE p_id = ?";
-
+    public String getProductImages(int productId) throws SQLException, ClassNotFoundException {
+        String sql = "SELECT img_url FROM product_img_url WHERE p_id = ?";
+        String image = "";
         try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, productId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    ProductImgUrlDTO image = new ProductImgUrlDTO();
-                    image.setP_id(rs.getInt("p_id"));
-                    image.setImg_url(rs.getString("img_url"));
-                    images.add(image);
+                if (rs.next()) {
+                    image = rs.getString("img_url");
+
                 }
             }
         }
-        return images;
+        return image;
     }
 
     public boolean addProductWithImages(ProductDTO product, List<String> imgUrls) throws SQLException, ClassNotFoundException {
-    try (Connection conn = DBUtils.getConnection()) {
-        conn.setAutoCommit(false);
-        int productId = addProduct(product, conn);
-        if (productId <= 0) {
-            conn.rollback();
-            conn.close();
-            throw new SQLException("Failed to add product. Product ID: " + productId);
-        }
+        try (Connection conn = DBUtils.getConnection()) {
+            conn.setAutoCommit(false);
+            int productId = addProduct(product, conn);
+            if (productId <= 0) {
+                conn.rollback();
+                conn.close();
+                throw new SQLException("Failed to add product. Product ID: " + productId);
+            }
 
-        boolean imagesAdded = addProductImgUrl(productId, imgUrls, conn);
-        if (!imagesAdded) {
-            conn.rollback();
-            conn.close();
-            throw new SQLException("Failed to add product images. Number of images: " + imgUrls.size());
-        }
+            boolean imagesAdded = addProductImgUrl(productId, imgUrls, conn);
+            if (!imagesAdded) {
+                conn.rollback();
+                conn.close();
+                throw new SQLException("Failed to add product images. Number of images: " + imgUrls.size());
+            }
 
-        conn.commit();
-        conn.close();
-        return true;
-    } catch (SQLException | ClassNotFoundException e) {
-        System.err.println("Error in addProductWithImages: " + e.getMessage());
-        e.printStackTrace();
-        throw e;
+            conn.commit();
+            conn.close();
+            return true;
+        } catch (SQLException | ClassNotFoundException e) {
+            System.err.println("Error in addProductWithImages: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
-}
 
     public int addProduct(ProductDTO product, Connection conn) throws SQLException, ClassNotFoundException {
-    String getSeqSql = "SELECT NEXT VALUE FOR product_id_seq";
-    int productId;
+        String getSeqSql = "SELECT NEXT VALUE FOR product_id_seq";
+        int productId;
 
-    try (PreparedStatement psSeq = conn.prepareStatement(getSeqSql);
-         ResultSet rs = psSeq.executeQuery()) {
-        if (rs.next()) {
-            productId = rs.getInt(1);
-        } else {
-            throw new SQLException("Không thể lấy giá trị từ SEQUENCE product_id_seq.");
+        try (PreparedStatement psSeq = conn.prepareStatement(getSeqSql);
+                ResultSet rs = psSeq.executeQuery()) {
+            if (rs.next()) {
+                productId = rs.getInt(1);
+            } else {
+                throw new SQLException("Không thể lấy giá trị từ SEQUENCE product_id_seq.");
+            }
         }
-    }
 
-    String sql = "INSERT INTO products (p_id, name, description, price, size, color, ct_id, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        ps.setString(2, product.getName());
-        ps.setString(3, product.getDescription());
-        ps.setDouble(4, product.getPrice());
-        ps.setString(5, product.getSize());
-        ps.setString(6, product.getColor());
-        ps.setInt(7, product.getCt_id());
-        ps.setInt(8, product.getStock_quantity());
+        String sql = "INSERT INTO products (p_id, name, description, price, size, color, ct_id, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ps.setString(2, product.getName());
+            ps.setString(3, product.getDescription());
+            ps.setDouble(4, product.getPrice());
+            ps.setString(5, product.getSize());
+            ps.setString(6, product.getColor());
+            ps.setInt(7, product.getCt_id());
+            ps.setInt(8, product.getStock_quantity());
 
-        int affectedRows = ps.executeUpdate();
-        if (affectedRows == 0) {
-            throw new SQLException("Thêm sản phẩm thất bại: Không có bản ghi nào được thêm.");
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Thêm sản phẩm thất bại: Không có bản ghi nào được thêm.");
+            }
+            System.out.println("Inserted Product ID: " + productId); // Log để debug
+            return productId;
+        } catch (SQLException e) {
+            System.err.println("Error in addProduct: " + e.getMessage());
+            throw e;
         }
-        System.out.println("Inserted Product ID: " + productId); // Log để debug
-        return productId;
-    } catch (SQLException e) {
-        System.err.println("Error in addProduct: " + e.getMessage());
-        throw e;
-    }
 
-}
+    }
     // thêm list img vào table product_img_url
 
     public boolean addProductImgUrl(int p_id, List<String> img_url_list, Connection conn) throws SQLException, ClassNotFoundException {
@@ -237,58 +235,58 @@ public class ProductDAO {
         }
     }
 
-    public List<ProductImgUrlDTO> updateProductWithImages(ProductDTO product, List<String> newImgUrls) throws SQLException, ClassNotFoundException {
-        try (Connection conn = DBUtils.getConnection()) {
-            conn.setAutoCommit(false); // Bắt đầu transaction
-
-            // Lấy danh sách ảnh cũ để xóa file vật lý sau này
-            List<ProductImgUrlDTO> oldImages = getProductImages(product.getId());
-
-            // Cập nhật thông tin sản phẩm
-            String updateProductSql = "UPDATE products SET name = ?, description = ?, price = ?, size = ?, color = ?, ct_id = ?, stock_quantity = ? WHERE p_id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(updateProductSql)) {
-                ps.setString(1, product.getName());
-                ps.setString(2, product.getDescription());
-                ps.setDouble(3, product.getPrice());
-                ps.setString(4, product.getSize());
-                ps.setString(5, product.getColor());
-                ps.setInt(6, product.getCt_id());
-                ps.setInt(7, product.getStock_quantity());
-                ps.setInt(8, product.getId());
-
-                int affectedRows = ps.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new SQLException("Cập nhật sản phẩm thất bại.");
-                }
-            }
-
-            // Xóa các ảnh cũ trong DB
-            String deleteImagesSql = "DELETE FROM product_img_url WHERE p_id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(deleteImagesSql)) {
-                ps.setInt(1, product.getId());
-                ps.executeUpdate();
-            }
-
-            // Thêm các ảnh mới
-            String insertImageSql = "INSERT INTO product_img_url (p_id, img_url) VALUES (?, ?)";
-            try (PreparedStatement ps = conn.prepareStatement(insertImageSql)) {
-                for (String imgUrl : newImgUrls) {
-                    ps.setInt(1, product.getId());
-                    ps.setString(2, imgUrl);
-                    ps.executeUpdate();
-                }
-            }
-
-            conn.commit(); // Lưu thay đổi nếu thành công
-
-            // Trả về danh sách ảnh cũ để xóa file vật lý
-             // Lưu danh sách ảnh cũ để xóa file vật lý
-            return oldImages;
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
+//    public List<ProductImgUrlDTO> updateProductWithImages(ProductDTO product, List<String> newImgUrls) throws SQLException, ClassNotFoundException {
+//        try (Connection conn = DBUtils.getConnection()) {
+//            conn.setAutoCommit(false); // Bắt đầu transaction
+//
+//            // Lấy danh sách ảnh cũ để xóa file vật lý sau này
+//            List<ProductImgUrlDTO> oldImages = getProductImages(product.getP_id());
+//
+//            // Cập nhật thông tin sản phẩm
+//            String updateProductSql = "UPDATE products SET name = ?, description = ?, price = ?, size = ?, color = ?, ct_id = ?, stock_quantity = ? WHERE p_id = ?";
+//            try (PreparedStatement ps = conn.prepareStatement(updateProductSql)) {
+//                ps.setString(1, product.getName());
+//                ps.setString(2, product.getDescription());
+//                ps.setDouble(3, product.getPrice());
+//                ps.setString(4, product.getSize());
+//                ps.setString(5, product.getColor());
+//                ps.setInt(6, product.getCt_id());
+//                ps.setInt(7, product.getStock_quantity());
+//                ps.setInt(8, product.getP_id());
+//
+//                int affectedRows = ps.executeUpdate();
+//                if (affectedRows == 0) {
+//                    throw new SQLException("Cập nhật sản phẩm thất bại.");
+//                }
+//            }
+//
+//            // Xóa các ảnh cũ trong DB
+//            String deleteImagesSql = "DELETE FROM product_img_url WHERE p_id = ?";
+//            try (PreparedStatement ps = conn.prepareStatement(deleteImagesSql)) {
+//                ps.setInt(1, product.getP_id());
+//                ps.executeUpdate();
+//            }
+//
+//            // Thêm các ảnh mới
+//            String insertImageSql = "INSERT INTO product_img_url (p_id, img_url) VALUES (?, ?)";
+//            try (PreparedStatement ps = conn.prepareStatement(insertImageSql)) {
+//                for (String imgUrl : newImgUrls) {
+//                    ps.setInt(1, product.getP_id());
+//                    ps.setString(2, imgUrl);
+//                    ps.executeUpdate();
+//                }
+//            }
+//
+//            conn.commit(); // Lưu thay đổi nếu thành công
+//
+//            // Trả về danh sách ảnh cũ để xóa file vật lý
+//            // Lưu danh sách ảnh cũ để xóa file vật lý
+//            return oldImages;
+//        } catch (SQLException | ClassNotFoundException e) {
+//            e.printStackTrace();
+//            throw e;
+//        }
+//    }
 
     public boolean deleteProduct(int productId) throws SQLException, ClassNotFoundException {
         String sql = "DELETE FROM products WHERE p_id = ?";

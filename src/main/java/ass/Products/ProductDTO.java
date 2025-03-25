@@ -18,19 +18,12 @@ public class ProductDTO {
     private String size;
     private String color;
     private int ct_id;
-
+    private String img;
     private int stock_quantity;
 
     public ProductDTO() {
     }
 
-    public int getId() {
-        return p_id;
-    }
-
-    public void setId(int id) {
-        this.p_id = id;
-    }
 
     public String getName() {
         return name;
@@ -86,6 +79,22 @@ public class ProductDTO {
 
     public void setStock_quantity(int stock_quantity) {
         this.stock_quantity = stock_quantity;
+    }
+
+    public int getP_id() {
+        return p_id;
+    }
+
+    public void setP_id(int p_id) {
+        this.p_id = p_id;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
     }
 
 }
