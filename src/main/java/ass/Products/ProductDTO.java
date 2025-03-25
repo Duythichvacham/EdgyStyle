@@ -80,12 +80,12 @@ public class ProductDTO {
         this.size = size;
     }
 
-    public int getQuantity() {
+    public int getStock_quantity() {
         return stock_quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.stock_quantity = quantity;
+    public void setStock_quantity(int stock_quantity) {
+        this.stock_quantity = stock_quantity;
     }
 
 }

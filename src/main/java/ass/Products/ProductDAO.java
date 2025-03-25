@@ -37,7 +37,7 @@ public class ProductDAO {
                 product.setSize(rs.getString("size"));
                 product.setColor(rs.getString("color"));
                 product.setCt_id(rs.getInt("ct_id"));
-                product.setQuantity(rs.getInt("stock_quantity"));
+                product.setStock_quantity(rs.getInt("stock_quantity"));
                 productList.add(product);
             }
         }
@@ -63,7 +63,7 @@ public class ProductDAO {
                     product.setSize(rs.getString("size"));
                     product.setColor(rs.getString("color"));
                     product.setCt_id(rs.getInt("ct_id"));
-                    product.setQuantity(rs.getInt("stock_quantity"));
+                    product.setStock_quantity(rs.getInt("stock_quantity"));
                 }
             }
         }
@@ -127,7 +127,7 @@ public class ProductDAO {
                     product.setSize(rs.getString("size"));
                     product.setColor(rs.getString("color"));
                     product.setCt_id(rs.getInt("ct_id"));
-                    product.setQuantity(rs.getInt("stock_quantity"));
+                    product.setStock_quantity(rs.getInt("stock_quantity"));
                     productList.add(product);
                 }
             }
@@ -156,51 +156,69 @@ public class ProductDAO {
         return images;
     }
 
-    public boolean addProductWithImages(ProductDTO product, List<String> imgUrls) {
-        try (Connection conn = DBUtils.getConnection()) {
-            conn.setAutoCommit(false); // Bắt đầu transaction
-
-            int productId = addProduct(product, conn);
-            if (productId > 0 && addProductImgUrl(productId, imgUrls, conn)) {
-                conn.commit(); // Lưu thay đổi nếu thành công
-                conn.close();
-                return true;
-            } else {
-                conn.rollback(); // Hoàn tác nếu lỗi
-                conn.close();
-                return false;
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+    public boolean addProductWithImages(ProductDTO product, List<String> imgUrls) throws SQLException, ClassNotFoundException {
+    try (Connection conn = DBUtils.getConnection()) {
+        conn.setAutoCommit(false);
+        int productId = addProduct(product, conn);
+        if (productId <= 0) {
+            conn.rollback();
+            conn.close();
+            throw new SQLException("Failed to add product. Product ID: " + productId);
         }
-        return false;
+
+        boolean imagesAdded = addProductImgUrl(productId, imgUrls, conn);
+        if (!imagesAdded) {
+            conn.rollback();
+            conn.close();
+            throw new SQLException("Failed to add product images. Number of images: " + imgUrls.size());
+        }
+
+        conn.commit();
+        conn.close();
+        return true;
+    } catch (SQLException | ClassNotFoundException e) {
+        System.err.println("Error in addProductWithImages: " + e.getMessage());
+        e.printStackTrace();
+        throw e;
     }
+}
 
     public int addProduct(ProductDTO product, Connection conn) throws SQLException, ClassNotFoundException {
-        String sql = "INSERT INTO products (name, description, price, size, color, ct_id, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    String getSeqSql = "SELECT NEXT VALUE FOR product_id_seq";
+    int productId;
 
-        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, product.getName());
-            ps.setString(2, product.getDescription());
-            ps.setDouble(3, product.getPrice());
-            ps.setString(4, product.getSize());
-            ps.setString(5, product.getColor());
-            ps.setInt(6, product.getCt_id());
-            ps.setInt(7, product.getQuantity());
-
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Thêm sản phẩm thất bại.");
-            } else {
-                try (ResultSet rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        return rs.getInt(1); // Trả về ID vừa tạo
-                    }
-                }
-            }
+    try (PreparedStatement psSeq = conn.prepareStatement(getSeqSql);
+         ResultSet rs = psSeq.executeQuery()) {
+        if (rs.next()) {
+            productId = rs.getInt(1);
+        } else {
+            throw new SQLException("Không thể lấy giá trị từ SEQUENCE product_id_seq.");
         }
-        return -1;
     }
+
+    String sql = "INSERT INTO products (p_id, name, description, price, size, color, ct_id, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, productId);
+        ps.setString(2, product.getName());
+        ps.setString(3, product.getDescription());
+        ps.setDouble(4, product.getPrice());
+        ps.setString(5, product.getSize());
+        ps.setString(6, product.getColor());
+        ps.setInt(7, product.getCt_id());
+        ps.setInt(8, product.getStock_quantity());
+
+        int affectedRows = ps.executeUpdate();
+        if (affectedRows == 0) {
+            throw new SQLException("Thêm sản phẩm thất bại: Không có bản ghi nào được thêm.");
+        }
+        System.out.println("Inserted Product ID: " + productId); // Log để debug
+        return productId;
+    } catch (SQLException e) {
+        System.err.println("Error in addProduct: " + e.getMessage());
+        throw e;
+    }
+
+}
     // thêm list img vào table product_img_url
 
     public boolean addProductImgUrl(int p_id, List<String> img_url_list, Connection conn) throws SQLException, ClassNotFoundException {
@@ -235,7 +253,7 @@ public class ProductDAO {
                 ps.setString(4, product.getSize());
                 ps.setString(5, product.getColor());
                 ps.setInt(6, product.getCt_id());
-                ps.setInt(7, product.getQuantity());
+                ps.setInt(7, product.getStock_quantity());
                 ps.setInt(8, product.getId());
 
                 int affectedRows = ps.executeUpdate();

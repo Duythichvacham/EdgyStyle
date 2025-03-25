@@ -20,6 +20,15 @@
     <servlet>
         <servlet-name>HomeController</servlet-name>
         <servlet-class>ass.Controllers.HomeController</servlet-class>
+        
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>HomeController</servlet-name>
+        <url-pattern>/HomeController</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>ProductController</servlet-name>
+        <servlet-class>ass.Controllers.ProductController</servlet-class>
         <multipart-config>
         <max-file-size>10485760</max-file-size> <!-- Giới hạn 10MB -->
         <max-request-size>52428800</max-request-size> <!-- Tổng request 50MB -->
@@ -27,8 +36,8 @@
     </multipart-config>
     </servlet>
     <servlet-mapping>
-        <servlet-name>HomeController</servlet-name>
-        <url-pattern>/HomeController</url-pattern>
+        <servlet-name>ProductController</servlet-name>
+        <url-pattern>/ProductController</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>MainController</servlet-name>
@@ -44,6 +53,6 @@
         </session-timeout>
     </session-config>
     <welcome-file-list>
-        <welcome-file>home.jsp</welcome-file>
+        <welcome-file>ProductController</welcome-file>
     </welcome-file-list>
 </web-app>
